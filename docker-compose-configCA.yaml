@@ -1,0 +1,42 @@
+#
+# Copyright IBM Corp All Rights Reserved
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+version: '3.5'
+
+networks:
+  akc-net:
+    name: $NETWORK_NAME
+
+services:
+  configCA.org1:
+    container_name: configCA.org1
+    image: hyperledger/fabric-ca:${IMAGE_TAG}
+    environment:
+      - ORGNAMES=${ORGNAMES1}
+      - ORGDOMAINS=${ORGDOMAINS1}
+      - TLS_ENABLED=true
+    volumes:
+      - ./artifacts/:/shared/artifacts
+      - ./scripts/:/shared/scripts
+    working_dir: /shared/scripts
+    command: " /bin/bash -c ./configCA.sh"
+    networks:
+      - akc-net
+
+  configCA.org2:
+    container_name: configCA.org2
+    image: hyperledger/fabric-ca:${IMAGE_TAG}
+    environment:
+      - ORGNAMES=${ORGNAMES2}
+      - ORGDOMAINS=${ORGDOMAINS2}
+      - TLS_ENABLED=true
+    volumes:
+      - ./artifacts/:/shared/artifacts
+      - ./scripts/:/shared/scripts
+    working_dir: /shared/scripts
+    command: " /bin/bash -c ./configCA.sh"
+    networks:
+      - akc-net
+  

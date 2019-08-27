@@ -1,0 +1,33 @@
+---
+name: "AKC-ORGNAME"
+x-type: "hlfv1"
+
+#
+# Describe what the target network is/does.
+#
+description: "AKC Network - client definition for ORGNAME"
+
+#
+# Schema version of the content. Used by the SDK to apply the corresponding parsing rules.
+#
+version: "1.0"
+
+#
+# The client section is SDK-specific. The sample below is for the node.js SDK
+#
+client:
+  # Which organization does this application instance belong to? The value must be the name of an org
+  # defined under "organizations"
+  organization: ORGNAME
+
+  # Some SDKs support pluggable KV stores, the properties under "credentialStore"
+  # are implementation specific
+  credentialStore:
+    path: "/shared/crypto-path/fabric-client-kv-ORGNAME"
+
+    # [Optional]. Specific to the CryptoSuite implementation. Software-based implementations like
+    # CryptoSuite_ECDSA_AES.js in node SDK requires a key store. PKCS#11 based implementations does
+    # not.
+    cryptoStore:
+      # Specific to the underlying KeyValueStore that backs the crypto key store.
+      path: "/shared/crypto-store/fabric-client-kv-ORGNAME"

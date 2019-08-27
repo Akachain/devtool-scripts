@@ -1,0 +1,19 @@
+#
+version: '3.5'
+
+networks:
+  akc-net:
+    name: $NETWORK_NAME
+
+services:
+  cryptogen:
+    container_name: cryptogen
+    image: hyperledger/fabric-tools:$IMAGE_TAG
+    volumes:
+      - ./artifacts/:/shared/artifacts
+      - ./scripts/:/shared/scripts
+      - ./template/:/shared/template
+    working_dir: /shared/scripts
+    command: " /bin/bash -c ./generateCert.sh"
+    networks:
+      - akc-net

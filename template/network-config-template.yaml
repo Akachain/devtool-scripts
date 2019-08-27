@@ -1,0 +1,162 @@
+---
+name: "AKC"
+x-type: "hlfv1"
+
+#
+# Describe what the target network is/does.
+#
+description: "AKC Network"
+
+#
+# Schema version of the content. Used by the SDK to apply the corresponding parsing rules.
+#
+version: "1.0"
+
+channels:
+  # name of the channel
+  REQUESTCHANNEL:
+    orderers:
+      - orderer0.orderer
+    peers:
+      peer0.ORG1DOMAIN:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+      peer1.ORG1DOMAIN:
+        endorsingPeer: false
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: false
+
+      peer0.ORG2DOMAIN:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+      peer1.ORG2DOMAIN:
+        endorsingPeer: false
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: false
+
+#
+# list of participating organizations in this network
+#
+organizations:
+  ORG1NAME:
+    mspid: ORG1MSP
+
+    peers:
+      - peer0.ORG1DOMAIN
+      - peer1.ORG1DOMAIN
+
+    certificateAuthorities:
+      - ca-ORG1NAME
+
+    adminPrivateKey:
+      path: /data/app/artifacts/crypto-config/peerOrganizations/ORG1DOMAIN/users/Admin@ORG1DOMAIN/msp/keystore/ADMIN_ORG1_PRIVATE_KEY
+    signedCert:
+      path: /data/app/artifacts/crypto-config/peerOrganizations/ORG1DOMAIN/users/Admin@ORG1DOMAIN/msp/signcerts/Admin@ORG1DOMAIN-cert.pem
+
+  ORG2NAME:
+    mspid: ORG2MSP
+
+    peers:
+      - peer0.ORG2DOMAIN
+      - peer1.ORG2DOMAIN
+
+    certificateAuthorities:
+      - ca-ORG2NAME
+
+    adminPrivateKey:
+      path: /data/app/artifacts/crypto-config/peerOrganizations/ORG2DOMAIN/users/Admin@ORG2DOMAIN/msp/keystore/ADMIN_ORG2_PRIVATE_KEY
+    signedCert:
+      path: /data/app/artifacts/crypto-config/peerOrganizations/ORG2DOMAIN/users/Admin@ORG2DOMAIN/msp/signcerts/Admin@ORG2DOMAIN-cert.pem
+
+orderers:
+  orderer0.orderer:
+    url: grpcs://orderer0.orderer:7050
+
+    # these are standard properties defined by the gRPC library
+    # they will be passed in as-is to gRPC client constructor
+    grpcOptions:
+      ssl-target-name-override: orderer0.orderer
+      grpc-max-send-message-length: -1
+
+    tlsCACerts:
+      path: /data/app/artifacts/crypto-config/ordererOrganizations/orderer/orderers/orderer0.orderer/tls/ca.crt
+
+#
+# List of peers to send various requests to, including endorsement, query
+# and event listener registration.
+#
+peers:
+  peer0.ORG1DOMAIN:
+    # this URL is used to send endorsement and query requests
+    url: grpcs://peer0.ORG1DOMAIN:7051
+
+    grpcOptions:
+      ssl-target-name-override: peer0.ORG1DOMAIN
+    tlsCACerts:
+      path: /data/app/artifacts/crypto-config/peerOrganizations/ORG1DOMAIN/peers/peer0.ORG1DOMAIN/tls/ca.crt
+
+  peer1.ORG1DOMAIN:
+    url: grpcs://peer1.ORG1DOMAIN:7051
+    grpcOptions:
+      ssl-target-name-override: peer1.ORG1DOMAIN
+    tlsCACerts:
+      path: /data/app/artifacts/crypto-config/peerOrganizations/ORG1DOMAIN/peers/peer1.ORG1DOMAIN/tls/ca.crt
+
+  peer0.ORG2DOMAIN:
+    # this URL is used to send endorsement and query requests
+    url: grpcs://peer0.ORG2DOMAIN:7051
+
+    grpcOptions:
+      ssl-target-name-override: peer0.ORG2DOMAIN
+    tlsCACerts:
+      path: /data/app/artifacts/crypto-config/peerOrganizations/ORG2DOMAIN/peers/peer0.ORG2DOMAIN/tls/ca.crt
+
+  peer1.ORG2DOMAIN:
+    url: grpcs://peer1.ORG2DOMAIN:7051
+    grpcOptions:
+      ssl-target-name-override: peer1.ORG2DOMAIN
+    tlsCACerts:
+      path: /data/app/artifacts/crypto-config/peerOrganizations/ORG2DOMAIN/peers/peer1.ORG2DOMAIN/tls/ca.crt
+
+certificateAuthorities:
+  ca-ORG1NAME:
+    url: https://ca.ORG1NAME:7054
+    # the properties specified under this object are passed to the 'http' client verbatim when
+    # making the request to the Fabric-CA server
+    httpOptions:
+      verify: false
+    tlsCACerts:
+      path: /data/app/artifacts/crypto-config/peerOrganizations/ORG1DOMAIN/ca/ca.ORG1DOMAIN-cert.pem
+
+    # Fabric-CA supports dynamic user enrollment via REST APIs. A "root" user, a.k.a registrar, is
+    # needed to enroll and invoke new users.
+    registrar:
+      - enrollId: admin
+        enrollSecret: adminpw
+    # [Optional] The optional name of the CA.
+    caName: ca-ORG1NAME
+
+  ca-ORG2NAME:
+    url: https://ca.ORG2NAME:7054
+    # the properties specified under this object are passed to the 'http' client verbatim when
+    # making the request to the Fabric-CA server
+    httpOptions:
+      verify: false
+    tlsCACerts:
+      path: /data/app/artifacts/crypto-config/peerOrganizations/ORG2DOMAIN/ca/ca.ORG2DOMAIN-cert.pem
+
+    # Fabric-CA supports dynamic user enrollment via REST APIs. A "root" user, a.k.a registrar, is
+    # needed to enroll and invoke new users.
+    registrar:
+      - enrollId: admin
+        enrollSecret: adminpw
+    # [Optional] The optional name of the CA.
+    caName: ca-ORG2NAME

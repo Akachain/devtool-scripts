@@ -1,0 +1,202 @@
+
+---
+Organizations:
+
+    - &OrdererOrg
+        Name: AKCOrdererMSP
+
+        # ID to load the MSP definition as
+        ID: AKCOrdererMSP
+
+        # MSPDir is the filesystem path which contains the MSP configuration
+        MSPDir: crypto-config/ordererOrganizations/orderer/msp
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('AKCOrdererMSP.member', 'AKCOrdererMSP.peer', 'AKCOrdererMSP.client')"
+            Writers:
+                Type: Signature
+                Rule: "OR('AKCOrdererMSP.member', 'AKCOrdererMSP.peer', 'AKCOrdererMSP.client')"
+            Admins:
+                Type: Signature
+                Rule: "OR('AKCOrdererMSP.admin')"
+
+    - &Org1
+        Name: ORG1MSP
+
+        ID: ORG1MSP
+
+        MSPDir: crypto-config/peerOrganizations/ORG1DOMAIN/msp
+
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('ORG1MSP.admin', 'ORG1MSP.peer', 'ORG1MSP.client')"
+            Writers:
+                Type: Signature
+                Rule: "OR('ORG1MSP.admin', 'ORG1MSP.peer', 'ORG1MSP.client')"
+            Admins:
+                Type: Signature
+                Rule: "OR('ORG1MSP.admin')"
+
+        AnchorPeers:
+            - Host: peer0.ORG1DOMAIN
+              Port: 7051
+    - &Org2
+        Name: ORG2MSP
+
+        ID: ORG2MSP
+
+        MSPDir: crypto-config/peerOrganizations/ORG2DOMAIN/msp
+
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('ORG2MSP.admin', 'ORG2MSP.peer', 'ORG2MSP.client')"
+            Writers:
+                Type: Signature
+                Rule: "OR('ORG2MSP.admin', 'ORG2MSP.peer', 'ORG2MSP.client')"
+            Admins:
+                Type: Signature
+                Rule: "OR('ORG2MSP.admin')"
+
+        AnchorPeers:
+            - Host: peer0.ORG2DOMAIN
+              Port: 7051
+
+Capabilities:
+    Channel: &ChannelCapabilities
+        V1_3: true
+
+    Orderer: &OrdererCapabilities
+        V1_1: true
+
+    Application: &ApplicationCapabilities
+        V1_3: true
+        V1_2: false
+        V1_1: false
+
+
+Application: &ApplicationDefaults
+    Organizations:
+
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+
+    Capabilities:
+        <<: *ApplicationCapabilities
+
+Orderer: &OrdererDefaults
+
+    OrdererType: solo
+
+    Addresses:
+        - orderer0.orderer:7050
+
+    BatchTimeout: 2s
+
+    BatchSize:
+
+        MaxMessageCount: 500
+
+        # Absolute Max Bytes: The absolute maximum number of bytes allowed for
+        # the serialized messages in a batch.
+        AbsoluteMaxBytes: 98 MB
+
+        # Preferred Max Bytes: The preferred maximum number of bytes allowed for
+        # the serialized messages in a batch. A message larger than the preferred
+        # max bytes will result in a batch larger than preferred max bytes.
+        PreferredMaxBytes: 512 KB
+
+    Kafka:
+        Brokers:
+            - kafka0:9092
+
+    Organizations:
+
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+        # BlockValidation specifies what signatures must be included in the block
+        # from the orderer for the peer to validate it.
+        BlockValidation:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+
+    Capabilities:
+        <<: *OrdererCapabilities
+
+Channel: &ChannelDefaults
+    # Policies defines the set of policies at this level of the config tree
+    # For Channel policies, their canonical path is
+    #   /Channel/<PolicyName>
+    Policies:
+        # Who may invoke the 'Deliver' API
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        # Who may invoke the 'Broadcast' API
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        # By default, who may modify elements at this config level
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+
+
+    # Capabilities describes the channel level capabilities, see the
+    # dedicated Capabilities section elsewhere in this file for a full
+    # description
+    Capabilities:
+        <<: *ChannelCapabilities
+
+################################################################################
+#
+#   Profile
+#
+#   - Different configuration profiles may be encoded here to be specified
+#   as parameters to the configtxgen tool
+#
+################################################################################
+Profiles:
+
+    AKCOrdererGenesis:
+        Capabilities:
+            <<: *ChannelCapabilities
+        Orderer:
+            <<: *OrdererDefaults
+            Organizations:
+                - *OrdererOrg
+            Capabilities:
+                <<: *OrdererCapabilities
+        Consortiums:
+            AKCConsortium:
+                Organizations:
+                    - *Org1
+                    - *Org2
+
+    REQUESTCHANNEL:
+        Consortium: AKCConsortium
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *Org1
+                - *Org2
+            Capabilities:
+                <<: *ApplicationCapabilities
